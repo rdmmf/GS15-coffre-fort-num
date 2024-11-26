@@ -1,7 +1,7 @@
 from bitarray import bitarray, util
-from crypto.util import PHI, circular_left_shift, subsitution_box_128bits
+from crypto.utils import PHI, circular_left_shift, subsitution_box_128bits
 
-def key_scheduling(key):
+def key_scheduling(key, rondes = 32):
     # key est un bitarray
 
     if (len(key) > 256):
@@ -27,7 +27,7 @@ def key_scheduling(key):
     
     cles_de_tour = []
     # Transfo non linéaire
-    for i in range(0, 33):
+    for i in range(0, rondes+1):
         w0 = w_blocs[i*4]
         w1 = w_blocs[i*4+1]
         w2 = w_blocs[i*4+2]
@@ -39,7 +39,7 @@ def key_scheduling(key):
     w_sub = []
 
     # On recompose en 8 blocs de 32 bits
-    for i in range(0,33):
+    for i in range(0,rondes+1):
         cle_de_tour = cles_de_tour[i]   
 
         w0 = cle_de_tour >> 96
@@ -54,7 +54,7 @@ def key_scheduling(key):
 
     W_cles = []
     
-    for i in range(0,33):   # On recompose en clés de tour de 128 bits
+    for i in range(0,rondes+1):   # On recompose en clés de tour de 128 bits
         W = 0
         for j in range(0,8):    
             Wi = w_sub[4*i] << 96 | w_sub[4*i+1] << 64 | w_sub[4*i+2] << 32 | w_sub[4*i+3]
