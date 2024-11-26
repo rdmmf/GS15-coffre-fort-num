@@ -12,19 +12,13 @@ S_BOXES = [
 REVERSED_S_BOXES = []
 
 def generate_inverse_sboxes(sboxes):
-    inverse_sboxes = []
-    
+    reversed_sboxes = []
     for sbox in sboxes:
-        
-        inverse_sbox = [0] * 16
-        
-        for input_val, output_val in enumerate(sbox):
-            
-            inverse_sbox[output_val] = input_val
-        
-        inverse_sboxes.append(inverse_sbox)
-    
-    return inverse_sboxes
+        inverse_sbox = [0] * len(sbox)  # Initialize an array of the same size as the S-box
+        for i, value in enumerate(sbox):
+            inverse_sbox[value] = i  # Reverse the mapping
+        reversed_sboxes.append(inverse_sbox)
+    return reversed_sboxes
 
 def circular_left_shift(value, shift, bit_size):
     
@@ -44,7 +38,7 @@ def subsitution_box_4bits(bloc, sbox):
 
     return substitution
 
-def subsitution_box_128bits(bloc):
+def subsitution_box_128bits(bloc, sboxes = S_BOXES):
 
     # Si c'est un bit array
     if isinstance(bloc, bitarray):
@@ -56,13 +50,13 @@ def subsitution_box_128bits(bloc):
 
         # Selectionner parmis les 4 s-boxes
         if (i < 8):
-            sbox = S_BOXES[0]
+            sbox = sboxes[0]
         elif (i < 16):
-            sbox = S_BOXES[1]
+            sbox = sboxes[1]
         elif (i < 24):
-            sbox = S_BOXES[2]
+            sbox = sboxes[2]
         elif (i < 32):
-            sbox = S_BOXES[3]
+            sbox = sboxes[3]
         else:
             raise Exception("Index de S-box invalide")
 
@@ -71,5 +65,8 @@ def subsitution_box_128bits(bloc):
         substitution += subsitution_box_4bits(segment, sbox) << (i*4)
 
     return substitution
+
+def reverse_subsitution_box_128bits(bloc):
+    return subsitution_box_128bits(bloc, REVERSED_S_BOXES)
 
 REVERSED_S_BOXES = generate_inverse_sboxes(S_BOXES)
