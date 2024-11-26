@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os, argparse
+import crypto.keys as keys
 
 def input_selection (options):
     # q une liste de choix
