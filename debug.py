@@ -1,11 +1,11 @@
 
 from crypto.keys import key_scheduling
-from crypto.utils import subsitution_box_128bits, reverse_subsitution_box_128bits
+from crypto.utils import subsitution_box_128bits, reverse_subsitution_box_128bits, get_blocs_128bits, get_array_from_int
 from bitarray.util import int2ba, ba2int
-from crypto.algo import cobra_encrypt, feistel_f
+from crypto.algo import cobra_encrypt, feistel_f, cobra_decrypt
 
 from bitarray import bitarray, util
-import random
+import random, time
 
 if __name__ == "__main__":
     input_key = bitarray()
@@ -31,20 +31,33 @@ if __name__ == "__main__":
 
     print("On récupère n clés : ",len(subkeys))
 
-    # data = bitarray()
-    # # Ouvrir le fichier avec bitarray
-    # with open("TPs/files/rond.png", "rb") as f:
-    #     data = bitarray()
-    #     data.fromfile(f)
-
+    
+    # TEST TEXTE
     data = bitarray()
-    for i in range(3000):
-        data.append(random.getrandbits(1))
+    data.frombytes(b"Hello World ! Hello World ! Hello World ! Hello World !")
+    print("Original: ",data.tobytes().decode("utf-8"))
 
-    cobra_encrypt(input_key, data)
+    encrypted = cobra_encrypt(input_key, data)
+    decrypted = cobra_decrypt(input_key, encrypted)
+    print("Decrypted : ",get_array_from_int(decrypted, len(data)).tobytes().decode("latin-1"))
 
-    for i in range(300):
-        y = feistel_f(i)
-        print("Feistel f de ",i," : ",y)
-        print("len : ",len(int2ba(y)))
+    if (input("Voulez-vous continuer avec un fichier ? (y/n) : ") == "n"):
+        exit()
+    print("Chiffrement de docs/Projet_A24_coffreFort.pdf vers docs/Projet_A24_coffreFort_decrypted.pdf")
+    print("...")
+    # TEST IMAGE
+    data = bitarray()
+    # # Ouvrir le fichier avec bitarray
+    with open("docs/Projet_A24_coffreFort.pdf", "rb") as f:
+        data = bitarray()
+        data.fromfile(f)
 
+    encrypted = cobra_encrypt(input_key, data)
+    decrypted = cobra_decrypt(input_key, encrypted)
+
+    d = get_array_from_int(decrypted, len(data))
+    with open("docs/Projet_A24_coffreFort_decrypted.pdf", "wb") as f:
+        d.tofile(f)
+    s = time.time()
+    print("fin...")
+    print("Temps : ",time.time()-s)

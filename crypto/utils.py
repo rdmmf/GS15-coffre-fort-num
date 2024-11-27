@@ -28,6 +28,14 @@ def circular_right_shift(value, shift, bit_size):
     
     return ((value >> shift) | (value << (bit_size - shift))) & ((1 << bit_size) - 1)
 
+def left_shift(value, shift, bit_size):
+    
+    return (value << shift) & ((1 << bit_size) - 1)
+
+def right_shift(value, shift, bit_size):
+        
+    return (value >> shift) & ((1 << bit_size) - 1)
+
 def subsitution_box_4bits(bloc, sbox):
 
     # Si c'est un bit array
@@ -68,5 +76,29 @@ def subsitution_box_128bits(bloc, sboxes = S_BOXES):
 
 def reverse_subsitution_box_128bits(bloc):
     return subsitution_box_128bits(bloc, REVERSED_S_BOXES)
+
+def get_blocs_128bits(data):
+    if isinstance(data, int):
+        data = int2ba(data)
+    # On découpe les données en blocs de 128 bits
+    padding_length = (128 - len(data) % 128) % 128
+    data = bitarray('0' * padding_length) + data
+
+    # Découpe le bitarray en blocs de 128 bits
+    blocs = [ ba2int( data[i:i + 128] ) for i in range(0, len(data), 128)]
+
+    return blocs
+
+def get_array_from_int(encoded_int, bit_length=None):
+
+    bitarr = int2ba(encoded_int, length=bit_length)
+
+
+    if len(bitarr) % 8 != 0:
+        padding_length = 8 - (len(bitarr) % 8)
+        bitarr = bitarray('0' * padding_length) + bitarr
+
+    
+    return bitarr
 
 REVERSED_S_BOXES = generate_inverse_sboxes(S_BOXES)
