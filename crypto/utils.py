@@ -89,15 +89,13 @@ def get_blocs_128bits(data):
 
     return blocs
 
-def get_array_from_int(encoded_int, bit_length=None):
+def get_array_from_int(encoded_int):
 
-    bitarr = int2ba(encoded_int, length=bit_length)
-
+    bitarr = int2ba(encoded_int)
 
     if len(bitarr) % 8 != 0:
         padding_length = 8 - (len(bitarr) % 8)
         bitarr = bitarray('0' * padding_length) + bitarr
-
     
     return bitarr
 

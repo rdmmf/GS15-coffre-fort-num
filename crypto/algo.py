@@ -67,53 +67,61 @@ def cobra_encrypt(key, data, iterations = 32, ronde_feistel = 4):
 
     return resultat 
 
-def cobra_decrypt(key, data, iterations = 32, ronde_feistel = 4):
+def cobra_decrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
+
+    bloc = blocs[i]
+    for iteration in range(iterations):
+        # On récupère les blocs de 32 bits
+        a = bloc >> 96
+        b = bloc >> 64 & 0xFFFFFFFF
+        c = bloc >> 32 & 0xFFFFFFFF
+        d = bloc & 0xFFFFFFFF
+
+        # Transfo linéaire
+        c = circular_right_shift(c, 22, 32)
+        a = circular_right_shift(a, 5, 32)
+
+        c = c ^ (left_shift(b,7,32) ^ d)
+        a = a ^ (b ^ d)
+
+        d = circular_right_shift(d, 7, 32)
+        b = circular_right_shift(b, 1, 32)
+
+        d = d ^ left_shift(a,3,32) ^ c
+        b = b ^ (a ^ c)
+
+        c = circular_right_shift(c, 3, 32)
+        a = circular_right_shift(a, 13, 32)
+
+        # On recombine les blocs
+        bloc = (a << 96) | (b << 64) | (c << 32) | d
+
+        bloc = reverse_subsitution_box_128bits(bloc)
+
+        bloc = bloc ^ keys[iterations-iteration-1]
+
+    blocs[i] = bloc
+
+def cobra_decrypt(key, data, iterations = 32, ronde_feistel = 4, parallelism = 8):
 
     keys = key_scheduling(key)
     blocs = get_blocs_128bits(data)
 
-    ###### VERIFICIATION QUE CE SOIT DECHIFFRABLE ######
-    # A RETIRER QUAND LA FONCTION EST FINIE
-    for iteration in range(iterations):
-        for i in range(len(blocs)):
-            # On récupère les blocs de 32 bits
-            a = blocs[i] >> 96
-            b = blocs[i] >> 64 & 0xFFFFFFFF
-            c = blocs[i] >> 32 & 0xFFFFFFFF
-            d = blocs[i] & 0xFFFFFFFF
+    threads = []
 
-            # Transfo linéaire
-            c = circular_right_shift(c, 22, 32)
-            a = circular_right_shift(a, 5, 32)
+    for i in range(len(blocs)):
+        threads.append(threading.Thread(target=cobra_decrypt_thread, args=(blocs,i, keys, iterations, ronde_feistel)))
+        threads[i].start()
 
-            c = c ^ (left_shift(b,7,32) ^ d)
-            a = a ^ (b ^ d)
-
-            d = circular_right_shift(d, 7, 32)
-            b = circular_right_shift(b, 1, 32)
-
-            d = d ^ left_shift(a,3,32) ^ c
-            b = b ^ (a ^ c)
-
-            c = circular_right_shift(c, 3, 32)
-            a = circular_right_shift(a, 13, 32)
-
-            # On recombine les blocs
-            blocs[i] = (a << 96) | (b << 64) | (c << 32) | d
-
-        for i in range(len(blocs)):
-            blocs[i] = reverse_subsitution_box_128bits(blocs[i])
-        for i in range(len(blocs)):
-            bloc = blocs[i]
-            blocs[i] = bloc ^ keys[iterations-iteration-1]
-
+    # On attend que tous les threads soient terminés
+    for thread in threads:
+        thread.join()
+    
     resultat = 0
     for i in range(len(blocs)):
         resultat = (resultat << 128) | blocs[i]
 
-    return resultat 
-
-        
+    return resultat  
 
     
     

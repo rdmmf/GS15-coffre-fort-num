@@ -38,14 +38,30 @@ if __name__ == "__main__":
     print("Original: ",data.tobytes().decode("utf-8"))
 
     encrypted = cobra_encrypt(input_key, data)
+
+    print(len(int2ba(encrypted)))
+    input_key2 = bitarray()
+    for i in range(256):
+        input_key2.append(random.getrandbits(1))
+
+
     decrypted = cobra_decrypt(input_key, encrypted)
-    print("Decrypted : ",get_array_from_int(decrypted, len(data)).tobytes().decode("latin-1"))
+    try:
+        print("Decrypted : ",get_array_from_int(decrypted).tobytes().decode("latin-1"))
+    except:
+        print("Error decoding")
+        print("Decrypted : ",get_array_from_int(decrypted))
+        
+
+
+
+    # TEST PDF
 
     if (input("Voulez-vous continuer avec un fichier ? (y/n) : ") == "n"):
         exit()
-    print("Chiffrement de docs/Projet_A24_coffreFort.pdf vers docs/Projet_A24_coffreFort_decrypted.pdf")
+    print("Chiffrement de docs/Projet_A24_coffreFort.pdf vers docs/Projet_A24_coffreFort_encrypted.pdf")
     print("...")
-    # TEST IMAGE
+
     data = bitarray()
     # # Ouvrir le fichier avec bitarray
     with open("docs/Projet_A24_coffreFort.pdf", "rb") as f:
@@ -53,9 +69,21 @@ if __name__ == "__main__":
         data.fromfile(f)
 
     encrypted = cobra_encrypt(input_key, data)
+
+    e = get_array_from_int(encrypted)
+    with open("docs/Projet_A24_coffreFort_encrypted.bin", "wb") as f:
+        e.tofile(f)
+
+    print("Déchiffrement de docs/Projet_A24_coffreFort_encrypted.bin vers docs/Projet_A24_coffreFort_decrypted.pdf")
+    print("...")
+
+    with open("docs/Projet_A24_coffreFort_encrypted.bin", "rb") as f:
+        encrypted = bitarray()
+        encrypted.fromfile(f)
+
     decrypted = cobra_decrypt(input_key, encrypted)
 
-    d = get_array_from_int(decrypted, len(data))
+    d = get_array_from_int(decrypted)
     with open("docs/Projet_A24_coffreFort_decrypted.pdf", "wb") as f:
         d.tofile(f)
     s = time.time()
