@@ -17,7 +17,8 @@ def cobra_encrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
         # On applique la S-box
         bloc = subsitution_box_128bits(bloc)
 
-        # Feistel
+        # Feistel à faire
+
 
         # Transfo linéaire
         # On récupère les blocs de 32 bits
@@ -96,8 +97,13 @@ def cobra_decrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
         # On recombine les blocs
         bloc = (a << 96) | (b << 64) | (c << 32) | d
 
+        # Feistel à faire
+
+
+        # Substitution box
         bloc = reverse_subsitution_box_128bits(bloc)
 
+        # XOR avec la clé de tour
         bloc = bloc ^ keys[iterations-iteration-1]
 
     blocs[i] = bloc
