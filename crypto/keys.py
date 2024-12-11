@@ -1,5 +1,6 @@
 from bitarray import bitarray, util
 from crypto.utils import PHI, circular_left_shift, subsitution_box_128bits
+from random import *
 
 def key_scheduling(key, rondes = 32):
     # key est un bitarray
@@ -62,8 +63,13 @@ def key_scheduling(key, rondes = 32):
         W_cles.append(Wi)
     return W_cles
     
+def generate_random_key(size = 256): # Génère une clé aléatoire de 128, 192 ou 256 bits
+    key = bitarray()
 
-
+    for i in range(size):
+        key.append(randint(0,1))
+    
+    return key
     
 
     

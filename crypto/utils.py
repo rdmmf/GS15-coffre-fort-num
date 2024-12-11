@@ -1,4 +1,5 @@
 from bitarray.util import ba2int, int2ba, bitarray
+from random import *
 # CONSTANTES
 
 PHI = 0x9E3779B9
