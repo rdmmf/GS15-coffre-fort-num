@@ -1,5 +1,5 @@
-from crypto.keys import *
-from crypto.utils import *
+from .keys import *
+from .utils import *
 
 import threading
 

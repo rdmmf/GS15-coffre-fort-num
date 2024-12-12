@@ -1,5 +1,5 @@
 from bitarray import bitarray, util
-from crypto.utils import PHI, circular_left_shift, subsitution_box_128bits
+from .utils import PHI, circular_left_shift, subsitution_box_128bits
 from random import *
 
 def key_scheduling(key, rondes = 32):
