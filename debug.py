@@ -5,14 +5,20 @@ from bitarray.util import int2ba, ba2int
 from crypto.algo import cobra_encrypt, feistel_f, cobra_decrypt
 from bitarray import bitarray, util
 import random, time
+import logging_config, logging
 
 import services
 
 if __name__ == "__main__":
+
+    logging_config.init_logging()
+
+    logger = logging.getLogger(__name__)
+
     # Diffie Hellman
-    client = services.Client()
-    server = services.Server()
-    auth = services.CertificationAuth()
+    client = services.Client(name="0")
+    server = services.Server(name="0")
+    auth = services.CertificationAuth(name="0")
 
     input_key = bitarray()
     for i in range(128):
