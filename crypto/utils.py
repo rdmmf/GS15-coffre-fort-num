@@ -1,5 +1,6 @@
 from bitarray.util import ba2int, int2ba, bitarray
 from random import *
+
 # CONSTANTES
 
 PHI = 0x9E3779B9
@@ -100,4 +101,37 @@ def get_array_from_int(encoded_int):
     
     return bitarr
 
+def PGCD(a, b):
+    while b != 0:
+        a, b = b, a % b
+    return a
+
+
+def mod_inverse(e, phi):
+    original_phi = phi
+    x0, x1 = 0, 1
+    while e > 1:
+        q = e // phi
+        e, phi = phi, e % phi
+        x0, x1 = x1 - q * x0, x0
+    if x1 < 0:
+        x1 += original_phi
+    return x1
+
+
+def is_prime(n):
+    if n <= 1:
+        return False
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+
+def generate_prime_number():
+    while True:
+        num = random.randint(100, 1000)
+        if is_prime(num):
+            return num
+        
 REVERSED_S_BOXES = generate_inverse_sboxes(S_BOXES)

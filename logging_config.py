@@ -8,7 +8,7 @@ if not os.path.exists("./logs"):
 def init_logging():
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        format="%(asctime)s - %(levelname)s - %(name)-10s - %(message)s",
         handlers=[
             logging.StreamHandler(),                # Logs pour la console
             logging.FileHandler("./logs/debug.log") # Logs dans un fichier

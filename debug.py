@@ -15,11 +15,6 @@ if __name__ == "__main__":
 
     logger = logging.getLogger(__name__)
 
-    # Diffie Hellman
-    client = services.Client(name="0")
-    server = services.Server(name="0")
-    auth = services.CertificationAuth(name="0")
-
     input_key = bitarray()
     for i in range(128):
         input_key.append(random.getrandbits(1))

@@ -1,12 +1,9 @@
 import logging
 
-class Client:
+from ..Endpoint import Endpoint
 
-    def __init__(self, name):
-        self.name = name
-        self.logger = logging.getLogger(self.__class__.__name__)
+class Client (Endpoint):
 
-        self.log("Created")
-
-    def log(self, msg):
-        self.logger.info(f"[Client {self.name}] {msg}")
+    def __init__(self, name, password, p, g):
+        super().__init__(name, password, p, g)
+        self.logger.info("Client initialized")
