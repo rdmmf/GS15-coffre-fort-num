@@ -1,5 +1,5 @@
 import crypto.diffie_hellman as diffie_hellman
-from crypto.algo import cobra_encrypt, cobra_decrypt
+from crypto.cobra import cobra_encrypt, cobra_decrypt
 from bitarray import bitarray
 from bitarray.util import int2ba, ba2int
 

@@ -17,9 +17,18 @@ def main():
     
     cert_auth = CertificationAuth("CertAuth","PassWordCertAuth",p,g)
 
+    # import os
+    # file_path = "data/accounts_key/Alice.pub"
+    # if os.path.exists(file_path):
+    #     os.remove(file_path)
+
+    # server.create_account("Alice",client.public_key)
+    
+    server.load_accounts()
+
     # Etablir une session entre le client et le serveur
     client.establish_session(server.public_key)
-    server.establish_session(client.public_key)
+    server.establish_session(server.accounts["Alice"])
 
     print("Session établie:", client.sessions[server.public_key].shared_key == server.sessions[client.public_key].shared_key)
 
@@ -29,8 +38,6 @@ def main():
     decrypted = server.sessions[client.public_key].decrypt(encrypted)
 
     print("Message déchiffré:", get_array_from_int(decrypted).tobytes().decode("latin-1"))
-
-    server.create_account("Alice",b"pub key")
 
 main()
     
