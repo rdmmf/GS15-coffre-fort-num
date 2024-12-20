@@ -14,6 +14,7 @@ def main():
 
     client = Client("Alice","PassWordAliceTestTestTesTtestazgdyhjqkjd",p,g)
     server = Server("Server","PassWordServer",p,g)
+    
     cert_auth = CertificationAuth("CertAuth","PassWordCertAuth",p,g)
 
     # Etablir une session entre le client et le serveur
@@ -28,6 +29,8 @@ def main():
     decrypted = server.sessions[client.public_key].decrypt(encrypted)
 
     print("Message déchiffré:", get_array_from_int(decrypted).tobytes().decode("latin-1"))
+
+    server.create_account("Alice",b"pub key")
 
 main()
     

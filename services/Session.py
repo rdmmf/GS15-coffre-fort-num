@@ -29,7 +29,7 @@ class Session:
         elif isinstance(message, bitarray):
             message_bitarray = message
         else:
-            raise ValueError("Format de message non supporté")
+            raise ValueError("Message format not supported")
 
         shared_bitarray_key = int2ba(self.shared_key)
         
@@ -45,7 +45,7 @@ class Session:
         elif isinstance(message, bitarray):
             message_bitarray = message
         else:
-            raise ValueError("Format de message non supporté")
+            raise ValueError("Message format not supported")
         
         shared_bitarray_key = int2ba(self.shared_key)
         

@@ -3,13 +3,56 @@ from .utils import *
 
 import threading
 
-def feistel_f(x):
+def feistel_f(keys,i,x):
     # Prend un entier 256 bits
     # Retourne un entier 256 bits
-    return x # TEMPOIRAIRE
+    Z = int((pow(x + 1, -1) - 1) % 257)
+
+    # Permutation
+    Y = Z   # Temporaire
+
+    # Clés d'itération
+    # ...
+
+
+    return Z
+
+def feistel_rere_encrypt(bloc, keys, ronde_feistel, f_function):
+    # On découpe les blocs de 128 bits en deux : L et R
+
+    L = bloc >> 64
+    R = bloc & 0xFFFFFFFFFFFFFFFF
+    
+    for i in range(ronde_feistel):
+
+        L1 = R
+        R = L ^ f_function(keys,i,R)
+        L = L1
+
+    result = L << 64
+    result += R
+
+    return result
+
+def feistel_rere_decrypt(bloc, keys, ronde_feistel, f_function):
+    # On découpe les blocs de 128 bits en deux : L et R
+
+    L = bloc >> 64
+    R = bloc & 0xFFFFFFFFFFFFFFFF
+    
+    for i in range(ronde_feistel -1,-1,-1):
+
+        R1 = L
+        L = R ^ f_function(keys,i,L)
+        R = R1
+
+    result = L << 64
+    result += R
+
+    return result
 
 def cobra_encrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
-    bloc = blocs[i]
+    bloc = blocs[i] # sous forme de int
     for iteration in range(iterations):
         # XOR avec la clé de tour
         bloc = bloc ^ keys[iteration]
@@ -18,7 +61,7 @@ def cobra_encrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
         bloc = subsitution_box_128bits(bloc)
 
         # Feistel à faire
-
+        bloc = feistel_rere_encrypt(bloc, keys, ronde_feistel, feistel_f)
 
         # Transfo linéaire
         # On récupère les blocs de 32 bits
@@ -98,7 +141,7 @@ def cobra_decrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
         bloc = (a << 96) | (b << 64) | (c << 32) | d
 
         # Feistel à faire
-
+        bloc = feistel_rere_decrypt(bloc, keys, ronde_feistel, feistel_f)
 
         # Substitution box
         bloc = reverse_subsitution_box_128bits(bloc)
