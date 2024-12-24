@@ -127,11 +127,38 @@ def is_prime(n):
             return False
     return True
 
+def is_prime_miller_rabin(n, k=50):
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    if n % 2 == 0:
+        return False
 
-def generate_prime_number():
+    r, d = 0, n - 1
+    while d % 2 == 0:
+        r += 1
+        d //= 2
+
+    # On teste k fois
+    for _ in range(k):
+        a = randint(2, n - 2)
+        x = pow(a, d, n)  
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(r - 1):
+            x = pow(x, 2, n)
+            if x == n - 1:
+                break
+        else:
+            return False
+    return True
+
+def generate_prime(nb_bits):
     while True:
-        num = random.randint(100, 1000)
-        if is_prime(num):
-            return num
+        x = getrandbits(nb_bits) | 1  # Pour s'assurer qu'il est impair
+        if is_prime_miller_rabin(x):
+            return x
+
         
 REVERSED_S_BOXES = generate_inverse_sboxes(S_BOXES)

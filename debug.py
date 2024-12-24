@@ -2,10 +2,13 @@
 from crypto.keys import key_scheduling, generate_random_key
 from crypto.utils import subsitution_box_128bits, reverse_subsitution_box_128bits, get_blocs_128bits, get_array_from_int
 from bitarray.util import int2ba, ba2int
-from crypto.algo import cobra_encrypt, feistel_f, cobra_decrypt
+from crypto.cobra import cobra_encrypt, feistel_f, cobra_decrypt
 from bitarray import bitarray, util
 import random, time
 import logging_config, logging
+from crypto.rsa import guillou_quisquater_protocol
+
+
 
 import services
 
@@ -14,6 +17,8 @@ if __name__ == "__main__":
     logging_config.init_logging()
 
     logger = logging.getLogger(__name__)
+    print("Guillou quisquater protocol signature ZKP : ")
+    guillou_quisquater_protocol()
 
     input_key = bitarray()
     for i in range(128):

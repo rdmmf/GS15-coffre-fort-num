@@ -6,21 +6,19 @@ from bitarray.util import int2ba, ba2int
 
 class Server (Endpoint):
 
-    def __init__(self, name, password, p, g):
-        super().__init__(name, password, p, g)
+    def __init__(self, name, password):
+        super().__init__(name, password)
         self.logger.info("Server initialized")
 
-        self.path = "data/accounts_key/"
+        self.path = "data/server/account_keys/"
 
-        self.accounts = {}
+        self.load_accounts()
 
     def create_account(self, username, public_key):
         # Verifier la validité du nom d'utilisateur comme nom de fichier
         if not username.isalnum():
             self.logger.error("Invalid username")
             return False
-        
-
 
         # Verifier si le compte existe déjà
         if os.path.exists(self.path + username + ".pub"):
@@ -36,11 +34,17 @@ class Server (Endpoint):
         # Enregistrer la clé publique
         with open(self.path + username + ".pub", "wb") as f:
             public_key.tofile(f)
+
+        self.load_accounts()
+
+        self.logger.info(f"Account {username} created")
         
     def load_accounts(self):
 
+        self.accounts = {}
+        
         if not os.path.exists(self.path):
-            os.mkdir(self.path)
+            os.makedirs(self.path)
 
         
         usernames = [f for f in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, f))]
@@ -54,6 +58,3 @@ class Server (Endpoint):
                 username = username[:-4]
 
             self.accounts[username] = ba2int(key)
-
-            
-        print(self.accounts)
