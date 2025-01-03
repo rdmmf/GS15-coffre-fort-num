@@ -1,7 +1,7 @@
 import logging, random
 from .Session import Session
 import crypto.diffie_hellman as diffie_hellman
-from crypto.hash import hash
+from crypto.hash import *
 
 class Endpoint:
 

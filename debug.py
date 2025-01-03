@@ -3,6 +3,7 @@ from crypto.keys import key_scheduling, generate_random_key
 from crypto.utils import subsitution_box_128bits, reverse_subsitution_box_128bits, get_blocs_128bits, get_array_from_int
 from bitarray.util import int2ba, ba2int
 from crypto.cobra import cobra_encrypt, feistel_f, cobra_decrypt
+from crypto.hash import custom_hash
 from bitarray import bitarray, util
 import random, time
 import logging_config, logging

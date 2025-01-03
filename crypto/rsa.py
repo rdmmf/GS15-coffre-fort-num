@@ -1,6 +1,6 @@
 import random
 from crypto.utils import generate_prime
-from crypto.hash import hash
+from crypto.hash import *
 
 def generate_rsa_keys(seed, bits=512, e=65537):
     p = generate_prime(bits // 2, seed)
@@ -39,7 +39,8 @@ def verifier_verify_M(Cert,r,Proof,e,n,M):
 
 def guillou_quisquater_protocol():
     # Prover
-    seed = hash("password")
+    #seed = hash("password")
+    seed = custom_hash("password")
     print(seed)
     public_key, private_key = generate_rsa_keys(seed)
     e, n = public_key

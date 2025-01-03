@@ -1,33 +1,34 @@
 from .keys import *
 from .utils import *
+from .hash import *
 
 import threading
 
-def feistel_f(K_keys,ronde,X):
-    # On découpe en blocs de 8 bits le bloc X de 64 bits
-    Z=0
+def feistel_f(keys,ronde,X):
+
     # Étape 1 : Découper le bloc R en blocs de 8 bits et appliquer la transformation non linéaire.
+    Z=0
     for i in range(16):  # 16 blocs de 8 bits dans un bloc de 128 bits.
         byte = (X >> (8 * i)) & 0xFF  # Extrait un bloc de 8 bits.
         inverted_byte = int(bin(byte)[2:].zfill(8)[::-1], 2)  # Inverse l'ordre des bits.
-        transformed_byte = ((pow(inverted_byte + 1, -1, 257) - 1) & 0xFF)
-        #temp = pow(inverted_byte + 1, -1) % 257 - 1
-        #transformed_byte = int(temp) & 0xFF  # Applique la transformation f(x).
+        transformed_byte = ((pow(inverted_byte + 1, -1, 257) - 1) & 0xFF) # Applique la transformation f(x).
         Z |= (transformed_byte << (8 * i))  # Reconstruit le bloc Z.
-        #print(byte, inverted_byte, transformed_byte, Z)
-    
-    # /!\ INVERSER LE SENS DES BITS
+
     # Je pense qu'il faudra utiliser K_keys[ronde feistel] pour la suite
 
-    #Z = X #int((pow(x + 1, -1) - 1) % 257)
-
     # Permutation
-    Y = Z   # Temporaire
+    # Étape 2 : Mélanger les bits de Z avec une permutation définie.
+    p = [7, 5, 3, 1, 0, 2, 4, 6]  # Permutation pour chaque octet.
+    Y = 0
+    for i in range(16):  # 16 blocs de 8 bits.
+        byte = (Z >> (8 * i)) & 0xFF
+        permuted_byte = sum(((byte >> j) & 1) << p[j] for j in range(8))
+        Y |= (permuted_byte << (8 * i))
 
     # Clés d'itération
     # ...
 
-    FINAL = 0
+    '''FINAL = 0
     for i in range(16):
         byte = (Y >> (8 * i)) & 0xFF  # Extrait un bloc de 8 bits.
         random.seed(byte)
@@ -35,9 +36,25 @@ def feistel_f(K_keys,ronde,X):
         FINAL |= (prng << (8 * i))
 
     #XOR avec la clé de tour
-    FINAL = FINAL ^ K_keys[ronde]
+    FINAL = FINAL ^ K_keys[ronde]'''
+    
+    '''# Étape 3 : Génération pseudo-aléatoire et mélange avec la clé.
+    derived_key = custom_hash(str(keys)) & ((1 << 128) - 1)  # Dérive une clé entière sur 128 bits.
+    prng_value = 0
+    for i in range(16):
+        byte = (Y >> (8 * i)) & 0xFF
+        seed = (byte ^ ((derived_key >> (8 * (i % 16))) & 0xFF)) & 0xFF  # Combine avec un octet de la clé dérivée.
+        prng_value |= ((seed * 1103515245 + 12345) & 0xFF) << (8 * i)  # Génère une valeur pseudo-aléatoire.
+'''
+    # Étape 3 : Génération pseudo-aléatoire et mélange avec la clé.
+    derived_key = custom_hash(str(keys)) & ((1 << 128) - 1)  # Dérive une clé entière sur 128 bits.
+    prng_value = Y  # Initialise prng_value avec y pour assurer la réversibilité.
+    for i in range(16):
+        byte = (Y >> (8 * i)) & 0xFF
+        seed = (byte ^ ((derived_key >> (8 * (i % 16))) & 0xFF)) & 0xFF  # Combine avec un octet de la clé dérivée.
+        prng_value ^= (seed << (8 * i))  # Utilise XOR pour garantir la réversibilité.
 
-    return FINAL
+    return prng_value
 
 def feistel_rere_encrypt(bloc, keys, i, ronde_feistel, f_function):
     # On découpe les blocs de 128 bits en deux : L et R
