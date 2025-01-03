@@ -61,7 +61,7 @@ def key_scheduling(key, rondes = 32):
             Wi = w_sub[4*i] << 96 | w_sub[4*i+1] << 64 | w_sub[4*i+2] << 32 | w_sub[4*i+3]
 
         W_cles.append(Wi)
-    return W_cles
+    return W_cles,k_blocs
     
 def generate_random_key(size = 256): # Génère une clé aléatoire de 128, 192 ou 256 bits
     key = bitarray()

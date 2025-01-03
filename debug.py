@@ -39,9 +39,10 @@ if __name__ == "__main__":
     print("Key : ",ba2int(input_key))
 
     # On génère les sous clés
-    subkeys = key_scheduling(input_key)
+    W_keys, K_keys = key_scheduling(input_key)
 
-    print("On récupère n clés : ",len(subkeys))
+    print("On récupère n clés W : ",len(W_keys))
+    print("On récupère n clés K : ",len(K_keys))
 
     
     # TEST TEXTE

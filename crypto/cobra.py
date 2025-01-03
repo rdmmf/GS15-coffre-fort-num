@@ -3,11 +3,12 @@ from .utils import *
 
 import threading
 
-def feistel_f(keys,i,X):
+def feistel_f(K_keys,ronde,X):
     # On découpe en blocs de 8 bits le bloc X de 64 bits
     
     # /!\ INVERSER LE SENS DES BITS
-    
+    # Je pense qu'il faudra utiliser K_keys[ronde feistel] pour la suite
+
     Z = X #int((pow(x + 1, -1) - 1) % 257)
 
     # Permutation
@@ -19,16 +20,16 @@ def feistel_f(keys,i,X):
 
     return Z
 
-def feistel_rere_encrypt(bloc, keys, ronde_feistel, f_function):
+def feistel_rere_encrypt(bloc, keys, i, ronde_feistel, f_function):
     # On découpe les blocs de 128 bits en deux : L et R
 
     L = bloc >> 64
     R = bloc & 0xFFFFFFFFFFFFFFFF
     
-    for i in range(ronde_feistel):
+    for ronde in range(ronde_feistel):
 
         L1 = R
-        R = L ^ f_function(keys,i,R)
+        R = L ^ f_function(keys,ronde,R)
         L = L1
 
     result = L << 64
@@ -36,16 +37,16 @@ def feistel_rere_encrypt(bloc, keys, ronde_feistel, f_function):
 
     return result
 
-def feistel_rere_decrypt(bloc, keys, ronde_feistel, f_function):
+def feistel_rere_decrypt(bloc, keys, i, ronde_feistel, f_function):
     # On découpe les blocs de 128 bits en deux : L et R
 
     L = bloc >> 64
     R = bloc & 0xFFFFFFFFFFFFFFFF
     
-    for i in range(ronde_feistel -1,-1,-1):
+    for ronde in range(ronde_feistel -1,-1,-1):
 
         R1 = L
-        L = R ^ f_function(keys,i,L)
+        L = R ^ f_function(keys,ronde,L)
         R = R1
 
     result = L << 64
@@ -53,17 +54,17 @@ def feistel_rere_decrypt(bloc, keys, ronde_feistel, f_function):
 
     return result
 
-def cobra_encrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
+def cobra_encrypt_thread(blocs, i, W_keys, K_keys, iterations = 32, ronde_feistel = 4):
     bloc = blocs[i] # sous forme de int
     for iteration in range(iterations):
         # XOR avec la clé de tour
-        bloc = bloc ^ keys[iteration]
+        bloc = bloc ^ W_keys[iteration]
 
         # On applique la S-box
         bloc = subsitution_box_128bits(bloc)
 
         # Feistel à faire
-        bloc = feistel_rere_encrypt(bloc, keys, ronde_feistel, feistel_f)
+        bloc = feistel_rere_encrypt(bloc, K_keys, i, ronde_feistel, feistel_f)
 
         # Transfo linéaire
         # On récupère les blocs de 32 bits
@@ -94,13 +95,13 @@ def cobra_encrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
 
 def cobra_encrypt(key, data, iterations = 32, ronde_feistel = 4):
     
-    keys = key_scheduling(key)
+    W_keys, K_keys = key_scheduling(key)
     blocs = get_blocs_128bits(data)
 
     threads = []
 
     for i in range(len(blocs)):
-        threads.append(threading.Thread(target=cobra_encrypt_thread, args=(blocs,i, keys, iterations, ronde_feistel)))
+        threads.append(threading.Thread(target=cobra_encrypt_thread, args=(blocs,i, W_keys, K_keys, iterations, ronde_feistel)))
         threads[i].start()
 
     # On attend que tous les threads soient terminés
@@ -113,7 +114,7 @@ def cobra_encrypt(key, data, iterations = 32, ronde_feistel = 4):
 
     return resultat 
 
-def cobra_decrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
+def cobra_decrypt_thread(blocs, i, W_keys, K_keys, iterations = 32, ronde_feistel = 4):
 
     bloc = blocs[i]
     for iteration in range(iterations):
@@ -143,25 +144,25 @@ def cobra_decrypt_thread(blocs, i, keys, iterations = 32, ronde_feistel = 4):
         bloc = (a << 96) | (b << 64) | (c << 32) | d
 
         # Feistel à faire
-        bloc = feistel_rere_decrypt(bloc, keys, ronde_feistel, feistel_f)
+        bloc = feistel_rere_decrypt(bloc, K_keys, i,ronde_feistel, feistel_f)
 
         # Substitution box
         bloc = reverse_subsitution_box_128bits(bloc)
 
         # XOR avec la clé de tour
-        bloc = bloc ^ keys[iterations-iteration-1]
+        bloc = bloc ^ W_keys[iterations-iteration-1]
 
     blocs[i] = bloc
 
 def cobra_decrypt(key, data, iterations = 32, ronde_feistel = 4, parallelism = 8):
 
-    keys = key_scheduling(key)
+    W_keys, K_keys = key_scheduling(key)
     blocs = get_blocs_128bits(data)
 
     threads = []
 
     for i in range(len(blocs)):
-        threads.append(threading.Thread(target=cobra_decrypt_thread, args=(blocs,i, keys, iterations, ronde_feistel)))
+        threads.append(threading.Thread(target=cobra_decrypt_thread, args=(blocs,i, W_keys, K_keys, iterations, ronde_feistel)))
         threads[i].start()
 
     # On attend que tous les threads soient terminés
