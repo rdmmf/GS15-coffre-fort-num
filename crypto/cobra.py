@@ -5,11 +5,21 @@ import threading
 
 def feistel_f(K_keys,ronde,X):
     # On découpe en blocs de 8 bits le bloc X de 64 bits
+    Z=0
+    # Étape 1 : Découper le bloc R en blocs de 8 bits et appliquer la transformation non linéaire.
+    for i in range(16):  # 16 blocs de 8 bits dans un bloc de 128 bits.
+        byte = (X >> (8 * i)) & 0xFF  # Extrait un bloc de 8 bits.
+        inverted_byte = int(bin(byte)[2:].zfill(8)[::-1], 2)  # Inverse l'ordre des bits.
+        transformed_byte = ((pow(inverted_byte + 1, -1, 257) - 1) & 0xFF)
+        #temp = pow(inverted_byte + 1, -1) % 257 - 1
+        #transformed_byte = int(temp) & 0xFF  # Applique la transformation f(x).
+        Z |= (transformed_byte << (8 * i))  # Reconstruit le bloc Z.
+        #print(byte, inverted_byte, transformed_byte, Z)
     
     # /!\ INVERSER LE SENS DES BITS
     # Je pense qu'il faudra utiliser K_keys[ronde feistel] pour la suite
 
-    Z = X #int((pow(x + 1, -1) - 1) % 257)
+    #Z = X #int((pow(x + 1, -1) - 1) % 257)
 
     # Permutation
     Y = Z   # Temporaire
@@ -17,8 +27,17 @@ def feistel_f(K_keys,ronde,X):
     # Clés d'itération
     # ...
 
+    FINAL = 0
+    for i in range(16):
+        byte = (Y >> (8 * i)) & 0xFF  # Extrait un bloc de 8 bits.
+        random.seed(byte)
+        prng = random.randint(0,255) #Autre nombre de 8 bits
+        FINAL |= (prng << (8 * i))
 
-    return Z
+    #XOR avec la clé de tour
+    FINAL = FINAL ^ K_keys[ronde]
+
+    return FINAL
 
 def feistel_rere_encrypt(bloc, keys, i, ronde_feistel, f_function):
     # On découpe les blocs de 128 bits en deux : L et R
