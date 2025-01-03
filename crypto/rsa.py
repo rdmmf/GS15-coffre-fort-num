@@ -1,10 +1,10 @@
 import random
 from crypto.utils import generate_prime
+from crypto.hash import hash
 
-
-def generate_rsa_keys(bits=512, e=65537):
-    p = generate_prime(bits // 2)
-    q = generate_prime(bits // 2)
+def generate_rsa_keys(seed, bits=512, e=65537):
+    p = generate_prime(bits // 2, seed)
+    q = generate_prime(bits // 2, seed)
     n = p * q
     phi = (p - 1) * (q - 1)
     d = pow(e, -1, phi)
@@ -39,9 +39,13 @@ def verifier_verify_M(Cert,r,Proof,e,n,M):
 
 def guillou_quisquater_protocol():
     # Prover
-    public_key, private_key = generate_rsa_keys()
+    seed = hash("password")
+    print(seed)
+    public_key, private_key = generate_rsa_keys(seed)
     e, n = public_key
     d, _ = private_key
+
+    print(public_key,private_key)
 
     # Le prover choisit un secret x et en déduit le certificat associé
     secret = random.randint(2, n - 1)

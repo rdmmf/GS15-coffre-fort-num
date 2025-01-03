@@ -20,6 +20,9 @@ class Endpoint:
         # Dictionnaires des sessions en cours identifiées par la clé publique de l'entité distante
         self.sessions = {}
 
+        #self.public_key = hash(password)
+        #self.private_key = 
+
         self.logger = logging.getLogger(self.name)
 
     def initialize_session(self,id,p,g):

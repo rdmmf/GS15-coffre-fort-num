@@ -2,7 +2,7 @@
 
 from services import *
 from crypto.diffie_hellman import *
-from crypto.utils import get_array_from_int
+from crypto.utils import get_array_from_int, print_int_to_string
 
 import logging_config, logging
 
@@ -56,7 +56,9 @@ def main():
     # CONNECTION CERT AUTH CLIENT
     establish_session(cert_auth,client,p,g)
     
-
+    encrypted = server.sessions["Alice"].encrypt("test")
+    decrypted = client.sessions["Server"].decrypt(encrypted) # decrypted is an int, print it as a string
+    print(print_int_to_string(decrypted))
     # print("Session établie:", client.sessions["Server"].shared_key == server.sessions["Alice"].shared_key)
 
     # Chiffrer un msg

@@ -1,5 +1,5 @@
 from bitarray.util import ba2int, int2ba, bitarray
-from random import *
+import random
 
 # CONSTANTES
 
@@ -142,7 +142,7 @@ def is_prime_miller_rabin(n, k=50):
 
     # On teste k fois
     for _ in range(k):
-        a = randint(2, n - 2)
+        a = random.randint(2, n - 2)
         x = pow(a, d, n)  
         if x == 1 or x == n - 1:
             continue
@@ -154,11 +154,18 @@ def is_prime_miller_rabin(n, k=50):
             return False
     return True
 
-def generate_prime(nb_bits):
+def generate_prime(nb_bits, seed):
+    random.seed(seed)
     while True:
-        x = getrandbits(nb_bits) | 1  # Pour s'assurer qu'il est impair
+        x = random.getrandbits(nb_bits) | 1  # Pour s'assurer qu'il est impair
         if is_prime_miller_rabin(x):
             return x
+        
+def print_int_to_string(x):
+    try: 
+        return get_array_from_int(x).tobytes().decode("latin-1")
+    except:
+        return get_array_from_int(x).to01()
 
         
 REVERSED_S_BOXES = generate_inverse_sboxes(S_BOXES)

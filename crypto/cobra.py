@@ -3,10 +3,12 @@ from .utils import *
 
 import threading
 
-def feistel_f(keys,i,x):
-    # Prend un entier 256 bits
-    # Retourne un entier 256 bits
-    Z = int((pow(x + 1, -1) - 1) % 257)
+def feistel_f(keys,i,X):
+    # On découpe en blocs de 8 bits le bloc X de 64 bits
+    
+    # /!\ INVERSER LE SENS DES BITS
+    
+    Z = X #int((pow(x + 1, -1) - 1) % 257)
 
     # Permutation
     Y = Z   # Temporaire
