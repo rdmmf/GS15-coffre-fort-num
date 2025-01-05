@@ -17,11 +17,13 @@ class Server (Endpoint):
         # Verifier la validité du nom d'utilisateur comme nom de fichier
         if not username.isalnum():
             self.logger.error("Invalid username")
+            print("Invalid username")
             return False
 
         # Verifier si le compte existe déjà
         if os.path.exists(self.path + username):
             self.logger.error(f"Account {username} already exists")
+            print("Account already exists")
             return False
         
         if not os.path.exists(self.path):
@@ -38,6 +40,7 @@ class Server (Endpoint):
         # Verifier si le compte existe déjà
         if not os.path.exists(self.path + username):
             self.logger.error(f"Account {username} does not exist")
+            print(f"Account {username} does not exist")
             return False
         
         path = self.path + username
@@ -48,6 +51,8 @@ class Server (Endpoint):
             for dir in dirs:
                 os.rmdir(os.path.join(root, dir))
 
+        os.rmdir(path)
+
         self.logger.info(f"Account {username} deleted")
 
         return True
@@ -56,6 +61,7 @@ class Server (Endpoint):
         # Verifier si le compte existe déjà
         if not os.path.exists(self.path + username):
             self.logger.error(f"Account {username} does not exist")
+            print(f"Account {username} does not exist")
             return False
         
         return os.listdir(self.path + username)
@@ -64,6 +70,7 @@ class Server (Endpoint):
         # Verifier si le compte existe déjà
         if not os.path.exists(self.path + username):
             self.logger.error(f"Account {username} does not exist")
+            print(f"Account {username} does not exist")
             return False
 
         
@@ -99,6 +106,7 @@ class Server (Endpoint):
         # Verifier si le compte existe déjà
         if not os.path.exists(self.path + username):
             self.logger.error(f"Account {username} does not exist")
+            print(f"Account {username} does not exist")
             return False
         
         os.remove(self.path + username + "/" + filename)

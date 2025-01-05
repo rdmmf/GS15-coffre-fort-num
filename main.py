@@ -149,11 +149,13 @@ def get_file(client,filename=None, directory=None, output=None):
 
     ba = int2ba(decrypted_file, size)
     
-    
+    if directory[-1] != "/":
+        directory += "/"
+
     with open(directory + output, "wb") as file:
         ba.tofile(file)
     
-    print(f"Server file {filename} copied to {directory}/{output}")
+    print(f"Server file {filename} copied to {directory}{output}")
 
 def get_all_files(client,directory=None):
     if directory == None:

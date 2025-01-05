@@ -25,6 +25,8 @@ class CertificationAuth (Endpoint):
 
             cert,e,n = int(public_key[0]), int(public_key[1]), int(public_key[2])
 
+        self.logger.info(f"Certificate for {endpoint_name} retrieved")
+
         return cert,e,n
     
     def create_account(self, username, public_certificate):
@@ -55,6 +57,7 @@ class CertificationAuth (Endpoint):
         # Verifier si le compte existe déjà
         if not os.path.exists(self.path + username + ".cert"):
             self.logger.error(f"Account {username} does not exist")
+            print(f"Account {username} does not exist")
             return False
         
         os.remove(self.path + username + ".cert")
@@ -62,4 +65,3 @@ class CertificationAuth (Endpoint):
         self.logger.info(f"Account {username} deleted")
 
         return True
-
