@@ -11,7 +11,9 @@
 '''
 
 def custom_hash(data, rounds=4):
-    """Implémente un système de hashage basé sur une fonction éponge."""
+    '''
+    Implémente un système de hashage basé sur une fonction éponge.
+    '''
     # Initialisation de l'état de la fonction éponge
     state = [0] * 16  # 128 bits représentés par 16 octets
     block_size = len(state)
@@ -30,7 +32,9 @@ def custom_hash(data, rounds=4):
     return output  # Retourne le hash sous forme d'entier
 
 def sponge_permutation(state, rounds):
-    """Applique des permutations sur l'état pour diffuser les données."""
+    '''
+    Applique des permutations sur l'état pour diffuser les données.
+    '''
     for _ in range(rounds):
         # Exemple de permutation : XOR circulaire et rotation
         for i in range(len(state)):

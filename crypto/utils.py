@@ -14,6 +14,9 @@ S_BOXES = [
 REVERSED_S_BOXES = []
 
 def generate_inverse_sboxes(sboxes):
+    """
+    Génère les inverses des S-Boxes fournies.
+    """
     reversed_sboxes = []
     for sbox in sboxes:
         inverse_sbox = [0] * len(sbox)  # Initialize an array of the same size as the S-box
@@ -23,23 +26,33 @@ def generate_inverse_sboxes(sboxes):
     return reversed_sboxes
 
 def circular_left_shift(value, shift, bit_size):
-    
+    """
+    Effectue une rotation circulaire à gauche.
+    """
     return ((value << shift) | (value >> (bit_size - shift))) & ((1 << bit_size) - 1)
 
 def circular_right_shift(value, shift, bit_size):
-    
+    '''
+    Effectue une rotation circulaire à droite.
+    '''
     return ((value >> shift) | (value << (bit_size - shift))) & ((1 << bit_size) - 1)
 
 def left_shift(value, shift, bit_size):
-    
+    '''
+    Effectue un décalage à gauche.
+    '''
     return (value << shift) & ((1 << bit_size) - 1)
 
 def right_shift(value, shift, bit_size):
-        
+    '''
+    Effectue un décalage à droite.
+    '''
     return (value >> shift) & ((1 << bit_size) - 1)
 
 def subsitution_box_4bits(bloc, sbox):
-
+    '''
+    Applique une substitution via une S-Box sur un bloc de 4 bits.
+    '''
     # Si c'est un bit array
     if isinstance(bloc, bitarray):
         bloc = ba2int(bloc)  # Convertir les bits en entier pour chercher dans la S-Box
@@ -49,14 +62,16 @@ def subsitution_box_4bits(bloc, sbox):
     return substitution
 
 def subsitution_box_128bits(bloc, sboxes = S_BOXES):
-
+    '''
+    Applique des S-Boxes sur un bloc de 128 bits, 4 bits à la fois.
+    '''
     # Si c'est un bit array
     if isinstance(bloc, bitarray):
         bloc = ba2int(bloc)  # Convertir les bits en entier pour chercher dans la S-Box
 
     substitution = 0
 
-    for i in range(0,32):
+    for i in range(0,32): # Parcourt 32 segments de 4 bits dans le bloc
 
         # Selectionner parmis les 4 s-boxes
         if (i < 8):
@@ -80,6 +95,9 @@ def reverse_subsitution_box_128bits(bloc):
     return subsitution_box_128bits(bloc, REVERSED_S_BOXES)
 
 def get_blocs_128bits(data):
+    '''
+    Découpe les données en blocs de 128 bits.
+    '''
     if isinstance(data, int):
         data = int2ba(data)
     # On découpe les données en blocs de 128 bits
@@ -92,6 +110,9 @@ def get_blocs_128bits(data):
     return blocs
 
 def get_blocs_64bits(data):
+    '''
+    Découpe les données en blocs de 64 bits.
+    '''
     if isinstance(data, int):
         data = int2ba(data)
     # On découpe les données en blocs de 64 bits
@@ -104,6 +125,9 @@ def get_blocs_64bits(data):
     return blocs
 
 def get_blocs_1024bits(data):
+    '''
+    Découpe les données en blocs de 1024 bits.
+    '''
     if isinstance(data, int):
         data = int2ba(data)
     # On découpe les données en blocs de 1024 bits
@@ -126,12 +150,18 @@ def get_array_from_int(encoded_int):
     return bitarr
 
 def PGCD(a, b):
+    '''
+    Calcule le plus grand commun diviseur (PGCD) de deux nombres.
+    '''
     while b != 0:
         a, b = b, a % b
     return a
 
 
 def mod_inverse(e, phi):
+    '''
+    Calcule l'inverse modulaire de e mod phi via l'algorithme étendu d'Euclide.
+    '''
     original_phi = phi
     x0, x1 = 0, 1
     while e > 1:
@@ -144,6 +174,9 @@ def mod_inverse(e, phi):
 
 
 def is_prime(n):
+    '''
+    Teste si un nombre est premier
+    '''
     if n <= 1:
         return False
     for i in range(2, int(n**0.5) + 1):
@@ -152,6 +185,11 @@ def is_prime(n):
     return True
 
 def is_prime_miller_rabin(n, k=50):
+    '''
+    Teste si un nombre est premier avec le test de Miller-Rabin.
+    - n : Nombre à tester
+    - k : Nombre d'itérations du test
+    '''
     if n <= 1:
         return False
     if n <= 3:
@@ -179,6 +217,9 @@ def is_prime_miller_rabin(n, k=50):
     return True
 
 def generate_prime(nb_bits, seed):
+    '''
+    Génère un nombre premier de nb_bits bits en utilisant une graine.
+    '''
     random.seed(seed)
     while True:
         x = random.getrandbits(nb_bits) | 1  # Pour s'assurer qu'il est impair
@@ -186,12 +227,18 @@ def generate_prime(nb_bits, seed):
             return x
         
 def print_int_to_string(x):
+    '''
+    Convertit un entier en chaîne.
+    '''
     try: 
         return get_array_from_int(x).tobytes().decode("latin-1")
     except:
         return get_array_from_int(x).to01()
     
 def string_to_int(s):
+    '''
+    Convertit une chaîne en un entier.
+    '''
     s_bytes = s.encode("latin-1")
     return int.from_bytes( s_bytes, byteorder='big')
 

@@ -7,11 +7,11 @@ import logging
 from crypto.utils import get_array_from_int
 
 class Session:
-    """
+    '''
     Classe des sessions partagées entre les endpoints pour s'envoyer des messages
     Les messages sont chiffrés avec le chiffrement de cobra
     La clé de session est issue de l'algorithme de Diffie-Hellman
-    """
+    '''
 
     def __init__(self, id, p, g):
 

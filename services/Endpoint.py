@@ -7,10 +7,10 @@ import os
 
 class Endpoint:
 
-    """
+    '''
     Classe mère de CertificationAuth, Client et Server
     Gère les communications entre les entités avec des sessions chiffrées par Cobra
-    """
+    '''
 
     def __init__(self, name, password):
         self.name = name
