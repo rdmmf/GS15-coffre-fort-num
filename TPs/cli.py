@@ -19,11 +19,11 @@ p = 8867734669164087028314642636775614475577829335069436675407649261369902399122
 # Générateur
 g = 5
 
+client = None
+
 def input_selection (options, message=""):
     # q une liste de choix
-    print("----------------------------")
-    print("    GS15 - Digital Safe ")
-    print("----------------------------")
+
     if message != "":
         print(message)
 
@@ -69,7 +69,7 @@ def create_account(name="", password=""):
 
     client = Client(name,password)
     if not cert_auth.create_account(name,client.generate_certificate()):
-        return False,False
+        return False
     server.create_account(name)
     return establish_session(client,server,cert_auth,p,g), client
 
@@ -77,50 +77,29 @@ def delete_account(name):
     server.delete_account(name)
     return cert_auth.delete_account(name)
     
-def logged_in_menu(client):
+def logged_in_menu():
     print("Successfully logged in !")
     while True:
-        options = ["List files on the server","Save a file on the server", "Delete a file on the server", "Get a file from the server", "Get all files from the server", "Delete account", "Log out"]
+        options = ["Save a file on the server", "Get a file from the server", "Log out"]
 
         choice = input_selection(options, "What would you like to do ?")
 
         if choice == 1:
-            list_files(client.name)
+            print("Save a file")
         elif choice == 2:
-            save_file(client)
+            print("Get a file")
         elif choice == 3:
-            delete_file(client)
-        elif choice == 4:
-            get_file(client)
-        elif choice == 5:
-            get_all_files(client)
-        elif choice == 6:
-            if(delete_account(client.name)):
-                print("Account deleted")
-                client = None
-                
-                main_menu()
-                break
-            else:
-                print("Account deletion failed")
-        elif choice == 7:
             print("Logging out...")
-            client = None
             main_menu()
             break
         else:
             print("Leaving...")
             break
 
-def get_file(client,filename=None, directory=None, output=None):
 
-    if filename == None:
-        filename = input("Enter the file to get >")
-    if directory == None:
-        directory = input("Enter the directory to save the file >")
-    if output == None:
-        output = filename
+        choice = input_selection(options)
 
+def get_file(filename, directory, output):
     content,_ = server.get_file(client.name, filename)
 
     if not content:
@@ -143,20 +122,14 @@ def get_file(client,filename=None, directory=None, output=None):
     with open(directory + output, "wb") as file:
         ba.tofile(file)
     
-    print(f"Server file {filename} copied to {directory}/{output}")
+    print(f"Server file {filename} copied to {directory}{output}")
 
-def get_all_files(client,directory=None):
-    if directory == None:
-        directory = input("Enter the directory to save the files >")
-
+def get_all_files(directory):
     files = server.list_files(client.name)
     for file in files:
-        get_file(client,file, directory, file)
+        get_file(file, directory, file)
 
-def save_file(client,filename=None):
-    if filename == None:
-        filename = input("Enter the path of the file to save >")
-
+def save_file(filename):
     # Check if the file exists
     if not os.path.exists(filename):
         print("File does not exist")
@@ -196,19 +169,9 @@ def list_files(username):
     for file in files:
         print(file)
 
-def delete_file(client,filename=None):
-    if filename == None:
-        filename = input("Enter the file to delete >")
-
+def delete_file(filename):
     return server.delete_file(client.name, filename)
 
-def delete_all_files(client):
-    files = server.list_files(client.name)
-    for file in files:
-        if(delete_file(client,file)):
-            print(f"File {file} deleted")
-        else:
-            print(f"File {file} deletion failed")
 
 def main_menu():
     print("Welcome to the server !")
@@ -217,16 +180,14 @@ def main_menu():
         choice = input_selection(options, "What would you like to do ?")
 
         if choice == 1:
-            success,client = login()
-            if(success):
-                logged_in_menu(client)
+            if(login()):
+                logged_in_menu()
                 break
             else:
                 print("Login failed")
         elif choice == 2:
-            success,client = create_account()
-            if(success):
-                logged_in_menu(client)
+            if(create_account()):
+                logged_in_menu()
                 break
             else:
                 print("Account creation failed")
@@ -241,26 +202,29 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Digital safe CLI tool")
     parser.add_argument("-c", "--create", help="Create an account username:password")
     parser.add_argument("-u", "--user", help="Login username:password")
-    parser.add_argument("-du" ,"--delete-user", help="Delete the account username:password")
+    parser.add_argument("-da" ,"--delete-account", action="store_true", help="Delete the account")
     
+
     parser.add_argument("-s", "--save", metavar='FILENAME', help="Save a file on the server")
     parser.add_argument("-l", "--list", action="store_true", help="List all files on the server")
     parser.add_argument('-g', '--get', metavar='FILENAME', help='Get a file from the server')
     parser.add_argument("-ga", "--get-all", action="store_true", help="Get all files from the server")
-    parser.add_argument("-d", "--delete", help="Delete a file")
-    parser.add_argument("-da", "--delete-all", action="store_true", help="Delete all files from the server")
+    parser.add_argument("-d", "--delete", help="Delete an account")
+    parser.add_argument("-da", "--delete-all", help="Delete all files from the server")
     parser.add_argument("-o" ,"--output", help="Output name of the file to copy") 
 
+    
+    
     parser.add_argument('directory', nargs='?', help="Directory to copy (default: current directory)")
 
     args = parser.parse_args()
 
-    if (args.get or args.save or args.delete or args.list or args.delete_all or args.get_all) and (not (args.user or args.create)):
+    if (args.get or args.save or args.delete or args.list or args.delete_account) and (not (args.user or args.create)):
         print("Login required before actions : get, save, delete, list")
         exit()
 
-    if args.user and args.create and args.delete_user:
-        print("You can't login/create/delete an account at the same time")
+    if args.user and args.create:
+        print("You can't login and create an account at the same time")
         exit()
 
     client = None
@@ -289,25 +253,6 @@ if __name__ == "__main__":
 
             print("Account creation failed")
             exit()
-    
-    if args.delete_user:
-        try:
-            delete_info = args.delete_user.split(":")
-            username = delete_info[0]
-            password = delete_info[1]
-        except:
-            print("Invalid username format")
-        success,client = login(username, password)
-        if not success:
-
-            print("Authentification failed")
-        if delete_account(username):
-            print("Account deleted")
-            
-        else:
-            print("Account deletion failed")
-        exit()
-
         
     if args.user:
         try:
@@ -323,37 +268,37 @@ if __name__ == "__main__":
             print("Login failed")
             exit()
 
-
-        
-
     if args.directory:
         directory = args.directory
     else:
         directory = ""
 
-    if args.list:
+    if args.delete_account:
+        if delete_account(username):
+            print("Account deleted")
+        else:
+            print("Account deletion failed")
+
+    elif args.list:
         list_files(username)
     elif args.get:
         if args.output:
             output = args.output
         else:
             output = args.get
-        
-        get_file(client,args.get, directory, output)
-        
-    elif args.get_all:
-        get_all_files(client,directory)
 
+        get_file(args.get, directory, output)
+    elif args.all:
+        get_all_files(directory)
     elif args.save:
-        save_file(client,args.save)
-    
-    elif args.delete_all:
-        delete_all_files(client)
+        save_file(args.save)
     elif args.delete:
-        if(delete_file(client,args.delete)):
+        if(delete_file(args.delete)):
             print("File deleted")
         else:
             print("File deletion failed")
-        
+
+    elif args.delete_all:
+        delete_all_files()
         
     

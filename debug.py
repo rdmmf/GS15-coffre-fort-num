@@ -7,9 +7,9 @@ from crypto.hash import custom_hash
 from bitarray import bitarray, util
 import random, time
 import logging_config, logging
-from crypto.rsa import guillou_quisquater_protocol
+from crypto.rsa import guillou_quisquater_protocol, test_rsa_encrypt_decrypt, test_rsa_encrypt_decrypt_64bits
 
-
+from crypto.hash import custom_hash
 
 import services
 
@@ -19,7 +19,11 @@ if __name__ == "__main__":
 
     logger = logging.getLogger(__name__)
     print("Guillou quisquater protocol signature ZKP : ")
-    guillou_quisquater_protocol()
+    #guillou_quisquater_protocol()
+
+    print("RSA Encrypt Decrypt : ")
+    test_rsa_encrypt_decrypt()
+    #test_rsa_encrypt_decrypt_64bits()
 
     input_key = bitarray()
     for i in range(128):

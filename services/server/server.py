@@ -10,51 +10,95 @@ class Server (Endpoint):
         super().__init__(name, password)
         self.logger.info("Server initialized")
 
-        self.path = "data/server/account_keys/"
+        self.path = "data/server/accounts/"
 
-        self.load_accounts()
 
-    def create_account(self, username, public_key):
+    def create_account(self, username):
         # Verifier la validité du nom d'utilisateur comme nom de fichier
         if not username.isalnum():
             self.logger.error("Invalid username")
             return False
 
         # Verifier si le compte existe déjà
-        if os.path.exists(self.path + username + ".pub"):
+        if os.path.exists(self.path + username):
             self.logger.error(f"Account {username} already exists")
             return False
         
         if not os.path.exists(self.path):
-            os.mkdir(self.path)
-        
-        if isinstance(public_key, int):
-            public_key = int2ba(public_key)
-
-        # Enregistrer la clé publique
-        with open(self.path + username + ".pub", "wb") as f:
-            public_key.tofile(f)
-
-        self.load_accounts()
-
-        self.logger.info(f"Account {username} created")
-        
-    def load_accounts(self):
-
-        self.accounts = {}
-        
-        if not os.path.exists(self.path):
             os.makedirs(self.path)
 
-        
-        usernames = [f for f in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, f))]
-        
-        for username in usernames:
-            key = bitarray()
-            with open(self.path + username, "rb") as f:
-                key.fromfile(f)
+        os.makedirs(self.path + username)
 
-            if username[-4:] == ".pub":
-                username = username[:-4]
+        self.logger.info(f"Account {username} created")
 
-            self.accounts[username] = ba2int(key)
+        return True
+    
+    def delete_account(self, username):
+
+        # Verifier si le compte existe déjà
+        if not os.path.exists(self.path + username):
+            self.logger.error(f"Account {username} does not exist")
+            return False
+        
+        path = self.path + username
+        
+        for root, dirs, files in os.walk(path, topdown=False):
+            for file in files:
+                os.remove(os.path.join(root, file))
+            for dir in dirs:
+                os.rmdir(os.path.join(root, dir))
+
+        self.logger.info(f"Account {username} deleted")
+
+        return True
+    
+    def list_files(self, username):
+        # Verifier si le compte existe déjà
+        if not os.path.exists(self.path + username):
+            self.logger.error(f"Account {username} does not exist")
+            return False
+        
+        return os.listdir(self.path + username)
+    
+    def save_file(self, username, filename, content):
+        # Verifier si le compte existe déjà
+        if not os.path.exists(self.path + username):
+            self.logger.error(f"Account {username} does not exist")
+            return False
+
+        
+        with open(self.path + username + "/" + filename, "w") as file:
+            for bloc1024 in content:
+                file.write(str(bloc1024))
+                file.write("\n")
+        
+        return True
+    
+    def get_file(self, username, filename):
+        # Verifier si le compte existe déjà
+        if not os.path.exists(self.path + username):
+            self.logger.error(f"Account {username} does not exist")
+            return False
+        
+        
+        
+        with open(self.path + username + "/" + filename, "r") as file:
+            content = file.read().split("\n")
+
+        content = [int(bloc1024) for bloc1024 in content if bloc1024 != ""]
+
+        size = len(content)
+        return content, size
+    
+    def delete_file(self, username, filename):
+        # Verifier si le compte existe déjà
+        if not os.path.exists(self.path + username):
+            self.logger.error(f"Account {username} does not exist")
+            return False
+        
+        os.remove(self.path + username + "/" + filename)
+        
+        return True
+        
+        
+    

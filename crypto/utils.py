@@ -91,6 +91,30 @@ def get_blocs_128bits(data):
 
     return blocs
 
+def get_blocs_64bits(data):
+    if isinstance(data, int):
+        data = int2ba(data)
+    # On découpe les données en blocs de 64 bits
+    padding_length = (64 - len(data) % 64) % 64
+    data = bitarray('0' * padding_length) + data
+
+    # Découpe le bitarray en blocs de 64 bits
+    blocs = [ ba2int( data[i:i + 64] ) for i in range(0, len(data), 64)]
+
+    return blocs
+
+def get_blocs_1024bits(data):
+    if isinstance(data, int):
+        data = int2ba(data)
+    # On découpe les données en blocs de 1024 bits
+    padding_length = (1024 - len(data) % 1024) % 1024
+    data = bitarray('0' * padding_length) + data
+
+    # Découpe le bitarray en blocs de 1024 bits
+    blocs = [ ba2int( data[i:i + 1024] ) for i in range(0, len(data), 1024)]
+
+    return blocs
+
 def get_array_from_int(encoded_int):
 
     bitarr = int2ba(encoded_int)
@@ -166,6 +190,10 @@ def print_int_to_string(x):
         return get_array_from_int(x).tobytes().decode("latin-1")
     except:
         return get_array_from_int(x).to01()
+    
+def string_to_int(s):
+    s_bytes = s.encode("latin-1")
+    return int.from_bytes( s_bytes, byteorder='big')
 
         
 REVERSED_S_BOXES = generate_inverse_sboxes(S_BOXES)
