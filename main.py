@@ -267,6 +267,8 @@ if __name__ == "__main__":
     parser.add_argument("-da", "--delete-all", action="store_true", help="Delete all files from the server")
     parser.add_argument("-o" ,"--output", help="Output name of the file to copy") 
 
+    parser.add_argument("-m", "--menu", action="store_true", help="Run the main menu")
+
     parser.add_argument("-i", "--iterations", type=int, default=32, help="Number of iterations for the cobra encryption")
     parser.add_argument("-ce", "--client-encrypt", action="store_true", help="Encrypt the file on the client side")
 
@@ -285,13 +287,14 @@ if __name__ == "__main__":
     client = None
     server = Server("Server","PassWordServer")
     cert_auth = CertificationAuth("CertAuth","PassWordCertAuth")
-
+    
     if not cert_auth.get_certificate("Server"):
         cert_auth.create_account("Server",server.generate_certificate())
 
-    if not any(vars(args).values()):
+    if args.menu:
         # If no arguments are passed, run the main loop menu
         main_menu()
+        exit()
     
     if args.create:
         try:
