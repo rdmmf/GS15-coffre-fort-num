@@ -30,7 +30,7 @@ class Session:
 
         self.shared_key = diffie_hellman.generate_shared_key(self.diffie_hellman_private_key, remote_public_key, self.p)
 
-    def encrypt(self, message):
+    def encrypt(self, message, iterations = 32):
         # On vérifie le type du message
         if isinstance(message, str):
             message_bitarray = bitarray()
@@ -40,13 +40,13 @@ class Session:
         elif isinstance(message, bitarray):
             message_bitarray = message
         else:
-            raise ValueError("Message format not supported")
+            raise ValueError("Message format not supported", type(message))
 
         shared_bitarray_key = int2ba(self.shared_key)
         
-        return cobra_encrypt(shared_bitarray_key, message_bitarray)
+        return cobra_encrypt(shared_bitarray_key, message_bitarray, iterations)
     
-    def decrypt(self, message):
+    def decrypt(self, message, iterations = 32):
         # On vérifie le type du message
         if isinstance(message, str):
             message_bitarray = bitarray()
@@ -60,10 +60,6 @@ class Session:
         
         shared_bitarray_key = int2ba(self.shared_key)
 
-        decrypted = cobra_decrypt(shared_bitarray_key, message)
-        try:
-            self.logger.info(f"Decoded message : " + get_array_from_int(decrypted).tobytes().decode("latin-1"))
-        except Exception as e:
-            self.logger.error("Decoded message but couldn't encode : " + str(e))
+        decrypted = cobra_decrypt(shared_bitarray_key, message, iterations)
 
         return decrypted

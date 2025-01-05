@@ -71,6 +71,8 @@ class Server (Endpoint):
             for bloc1024 in content:
                 file.write(str(bloc1024))
                 file.write("\n")
+
+        self.logger.info(f"File {filename} saved for account {username}")
         
         return True
     
@@ -88,6 +90,9 @@ class Server (Endpoint):
         content = [int(bloc1024) for bloc1024 in content if bloc1024 != ""]
 
         size = len(content)
+
+        self.logger.info(f"File {filename} retrieved for account {username}")
+
         return content, size
     
     def delete_file(self, username, filename):
@@ -97,6 +102,8 @@ class Server (Endpoint):
             return False
         
         os.remove(self.path + username + "/" + filename)
+
+        self.logger.info(f"File {filename} deleted for account {username}")
         
         return True
         

@@ -41,6 +41,7 @@ class Endpoint:
     def rsa_encrypt(self, message, public_key=None):
         if not public_key:
             public_key = self.public_key
+
         return rsa.rsa_encrypt(public_key, message)
     
     def rsa_decrypt_1024(self, message):

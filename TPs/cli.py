@@ -150,7 +150,11 @@ def save_file(filename):
     # Encrypt the file
     encrypted_1024_blocs = client.rsa_encrypt(file)
     
-
+    for bloc in encrypted_1024_blocs:
+        encrypted_communication = client.sessions[server.name].encrypt(bloc)
+    print("DECRYPT")
+    for bloc in encrypted_communication:
+        decrypted_communication = server.sessions[client.name].decrypt(bloc)
 
     # Send the file to the server encrypted by the Diffie-Hellman session
     #encrypted_communication = client.sessions[server.name].encrypt(encrypted_file)
@@ -159,7 +163,7 @@ def save_file(filename):
     
     # Save the file on the server
     filename = os.path.basename(filename)
-    server.save_file(client.name, filename, encrypted_1024_blocs)
+    server.save_file(client.name, filename, decrypted_communication)
 
     print(f"File {filename} saved on the server")
 

@@ -19,6 +19,9 @@ p = 8867734669164087028314642636775614475577829335069436675407649261369902399122
 # Générateur
 g = 5
 
+# iterations = 32
+iterations = 1
+
 def input_selection (options, message=""):
     # q une liste de choix
     print("----------------------------")
@@ -121,14 +124,21 @@ def get_file(client,filename=None, directory=None, output=None):
     if output == None:
         output = filename
 
-    content,_ = server.get_file(client.name, filename)
+    encrypted_rsa_1024_blocs,_ = server.get_file(client.name, filename)
 
-    if not content:
+    if not encrypted_rsa_1024_blocs:
         print("File not found")
         return
     
+
+    encrypted_cobra_1024_blocs = [client.sessions[server.name].encrypt(encrypted_rsa_1024_blocs[i],iterations) for i in range(0, len(encrypted_rsa_1024_blocs))]
+
+    decrypted_cobra_1024_blocs = [server.sessions[client.name].decrypt(encrypted_cobra_1024_blocs[i],iterations) for i in range(0, len(encrypted_cobra_1024_blocs))]
+    
     # Decrypt the file
-    decrypted_file = client.rsa_decrypt_1024(content)
+    decrypted_file = client.rsa_decrypt_1024(decrypted_cobra_1024_blocs)
+
+
 
     # Get the number of bytes in the int decrypted_file
     size = decrypted_file.bit_length()
@@ -168,25 +178,18 @@ def save_file(client,filename=None):
     with open(filename, "rb") as file:
         ba.fromfile(file)
 
-    #print(ba)
-
     file = ba2int(ba)
-
-    #print(get_blocs_64bits(file))
 
     # Encrypt the file
     encrypted_1024_blocs = client.rsa_encrypt(file)
-    
 
+    encrypted_cobra_1024_blocs = [client.sessions[server.name].encrypt(encrypted_1024_blocs[i],iterations) for i in range(0, len(encrypted_1024_blocs))]
 
-    # Send the file to the server encrypted by the Diffie-Hellman session
-    #encrypted_communication = client.sessions[server.name].encrypt(encrypted_file)
-
-    #decrypted_communication = server.sessions[client.name].decrypt(encrypted_communication)
+    decrypted_cobra_1024_blocs = [server.sessions[client.name].decrypt(encrypted_cobra_1024_blocs[i],iterations) for i in range(0, len(encrypted_cobra_1024_blocs))]
     
     # Save the file on the server
     filename = os.path.basename(filename)
-    server.save_file(client.name, filename, encrypted_1024_blocs)
+    server.save_file(client.name, filename, decrypted_cobra_1024_blocs)
 
     print(f"File {filename} saved on the server")
 
@@ -235,7 +238,6 @@ def main_menu():
             break
 
 if __name__ == "__main__":
-
 
     # CLI Arguments 
     parser = argparse.ArgumentParser(description="Digital safe CLI tool")

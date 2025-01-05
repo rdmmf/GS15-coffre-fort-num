@@ -14,7 +14,6 @@ def feistel_f(keys,ronde,X):
         transformed_byte = ((pow(inverted_byte + 1, -1, 257) - 1) & 0xFF) # Applique la transformation f(x).
         Z |= (transformed_byte << (8 * i))  # Reconstruit le bloc Z.
 
-    # Je pense qu'il faudra utiliser K_keys[ronde feistel] pour la suite
 
     # Permutation
     # Étape 2 : Mélanger les bits de Z avec une permutation définie.
@@ -25,27 +24,7 @@ def feistel_f(keys,ronde,X):
         permuted_byte = sum(((byte >> j) & 1) << p[j] for j in range(8))
         Y |= (permuted_byte << (8 * i))
 
-    # Clés d'itération
-    # ...
 
-    '''FINAL = 0
-    for i in range(16):
-        byte = (Y >> (8 * i)) & 0xFF  # Extrait un bloc de 8 bits.
-        random.seed(byte)
-        prng = random.randint(0,255) #Autre nombre de 8 bits
-        FINAL |= (prng << (8 * i))
-
-    #XOR avec la clé de tour
-    FINAL = FINAL ^ K_keys[ronde]'''
-    
-    '''# Étape 3 : Génération pseudo-aléatoire et mélange avec la clé.
-    derived_key = custom_hash(str(keys)) & ((1 << 128) - 1)  # Dérive une clé entière sur 128 bits.
-    prng_value = 0
-    for i in range(16):
-        byte = (Y >> (8 * i)) & 0xFF
-        seed = (byte ^ ((derived_key >> (8 * (i % 16))) & 0xFF)) & 0xFF  # Combine avec un octet de la clé dérivée.
-        prng_value |= ((seed * 1103515245 + 12345) & 0xFF) << (8 * i)  # Génère une valeur pseudo-aléatoire.
-'''
     # Étape 3 : Génération pseudo-aléatoire et mélange avec la clé.
     derived_key = custom_hash(str(keys)) & ((1 << 128) - 1)  # Dérive une clé entière sur 128 bits.
     prng_value = Y  # Initialise prng_value avec y pour assurer la réversibilité.
