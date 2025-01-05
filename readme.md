@@ -7,7 +7,7 @@ GS15 Coffre-Fort Numérique is a secure digital vault application designed to st
 - Secure storage of sensitive information
 - User authentication and authorization
 - Data encryption using the cobra algorithm
-- CLI TOOL
+- CLI tool
 
 ## Installation
 1. Clone the repository:
@@ -37,13 +37,13 @@ GS15 Coffre-Fort Numérique is a secure digital vault application designed to st
     ```
 3. Connect to an account and save a local file:
     ```bash
-    python3 main.py -u <user:pass>-s <somefile>
+    python3 main.py -u <user:pass>-s <some_local_file>
     ```
 4. Connect to an account and get a file from the vault:
     ```bash
-    python3 main.py -u <user:pass> -g somefile -o <outputfile>
+    python3 main.py -u <user:pass> -g <some_server_file> -o <output_file>
     ```
 5. Connect to an account and get all files:
     ```bash
-    python3 main.py -u <user:pass> -ga <outputdirectory>
+    python3 main.py -u <user:pass> -ga <output_directory>
     ```
