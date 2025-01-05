@@ -6,9 +6,8 @@ GS15 Coffre-Fort Numérique is a secure digital vault application designed to st
 ## Features
 - Secure storage of sensitive information
 - User authentication and authorization
-- Data encryption
-- Easy-to-use interface
-- Backup and restore functionality
+- Data encryption using the cobra algorithm
+- CLI TOOL
 
 ## Installation
 1. Clone the repository:
