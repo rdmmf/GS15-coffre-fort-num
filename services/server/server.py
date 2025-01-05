@@ -96,6 +96,7 @@ class Server (Endpoint):
 
         content = [int(bloc1024) for bloc1024 in content if bloc1024 != ""]
 
+
         size = len(content)
 
         self.logger.info(f"File {filename} retrieved for account {username}")

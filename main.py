@@ -146,8 +146,9 @@ def get_file(client,iterations_cobra,filename=None, directory=None, output=None)
 
     ba = int2ba(decrypted_file, size)
     
-    if directory[-1] != "/":
-        directory += "/"
+    if directory != "":
+        if directory[-1] != "/":
+            directory += "/"
 
     with open(directory + output, "wb") as file:
         ba.tofile(file)
