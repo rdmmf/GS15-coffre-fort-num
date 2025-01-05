@@ -19,9 +19,6 @@ p = 8867734669164087028314642636775614475577829335069436675407649261369902399122
 # Générateur
 g = 5
 
-# iterations = 32
-iterations = 1
-
 def input_selection (options, message=""):
     # q une liste de choix
     print("----------------------------")
@@ -115,7 +112,7 @@ def logged_in_menu(client):
             print("Leaving...")
             break
 
-def get_file(client,filename=None, directory=None, output=None):
+def get_file(client,iterations_cobra,filename=None, directory=None, output=None):
 
     if filename == None:
         filename = input("Enter the file to get >")
@@ -131,9 +128,9 @@ def get_file(client,filename=None, directory=None, output=None):
         return
     
 
-    encrypted_cobra_1024_blocs = [client.sessions[server.name].encrypt(encrypted_rsa_1024_blocs[i],iterations) for i in range(0, len(encrypted_rsa_1024_blocs))]
+    encrypted_cobra_1024_blocs = [client.sessions[server.name].encrypt(encrypted_rsa_1024_blocs[i],iterations_cobra) for i in range(0, len(encrypted_rsa_1024_blocs))]
 
-    decrypted_cobra_1024_blocs = [server.sessions[client.name].decrypt(encrypted_cobra_1024_blocs[i],iterations) for i in range(0, len(encrypted_cobra_1024_blocs))]
+    decrypted_cobra_1024_blocs = [server.sessions[client.name].decrypt(encrypted_cobra_1024_blocs[i],iterations_cobra) for i in range(0, len(encrypted_cobra_1024_blocs))]
     
     # Decrypt the file
     decrypted_file = client.rsa_decrypt_1024(decrypted_cobra_1024_blocs)
@@ -157,15 +154,15 @@ def get_file(client,filename=None, directory=None, output=None):
     
     print(f"Server file {filename} copied to {directory}{output}")
 
-def get_all_files(client,directory=None):
+def get_all_files(client,iterations_cobra,directory=None):
     if directory == None:
         directory = input("Enter the directory to save the files >")
 
     files = server.list_files(client.name)
     for file in files:
-        get_file(client,file, directory, file)
+        get_file(client, iterations_cobra,file, directory, file)
 
-def save_file(client,filename=None):
+def save_file(client,iterations_cobra,filename=None, client_encrypt = False):
     if filename == None:
         filename = input("Enter the path of the file to save >")
 
@@ -182,18 +179,33 @@ def save_file(client,filename=None):
 
     file = ba2int(ba)
 
-    # Encrypt the file
-    encrypted_1024_blocs = client.rsa_encrypt(file)
+    if client_encrypt:
+        client.logger.info(f"Encrypting the file {filename} on the client side")
 
-    encrypted_cobra_1024_blocs = [client.sessions[server.name].encrypt(encrypted_1024_blocs[i],iterations) for i in range(0, len(encrypted_1024_blocs))]
+        encrypted_1024_blocs = client.rsa_encrypt(file)
 
-    decrypted_cobra_1024_blocs = [server.sessions[client.name].decrypt(encrypted_cobra_1024_blocs[i],iterations) for i in range(0, len(encrypted_cobra_1024_blocs))]
-    
+        encrypted_cobra_1024_blocs = [client.sessions[server.name].encrypt(encrypted_1024_blocs[i],iterations_cobra) for i in range(0, len(encrypted_1024_blocs))]
+
+        encrypted_file_to_save = [server.sessions[client.name].decrypt(encrypted_cobra_1024_blocs[i],iterations_cobra) for i in range(0, len(encrypted_cobra_1024_blocs))]
+   
+    else:
+        client.logger.info(f"Encrypting the file {filename} on the server side")
+
+        encrypted_communication = client.sessions[server.name].encrypt(file,iterations_cobra)
+
+        decrypted_communication = server.sessions[client.name].decrypt(encrypted_communication,iterations_cobra)
+        
+        encrypted_file_to_save = server.rsa_encrypt(decrypted_communication, client.public_key)
+
+
     # Save the file on the server
     filename = os.path.basename(filename)
-    server.save_file(client.name, filename, decrypted_cobra_1024_blocs)
+    server.save_file(client.name, filename, encrypted_file_to_save)
 
-    print(f"File {filename} saved on the server")
+    if client_encrypt:
+        print(f"File {filename} saved on the server after encryption clientside")
+    else:
+        print(f"File {filename} saved on the server after encryption serverside")
 
 def list_files(username):
     files = server.list_files(username)
@@ -254,6 +266,9 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--delete", help="Delete a file")
     parser.add_argument("-da", "--delete-all", action="store_true", help="Delete all files from the server")
     parser.add_argument("-o" ,"--output", help="Output name of the file to copy") 
+
+    parser.add_argument("-i", "--iterations", type=int, default=32, help="Number of iterations for the cobra encryption")
+    parser.add_argument("-ce", "--client-encrypt", action="store_true", help="Encrypt the file on the client side")
 
     parser.add_argument('directory', nargs='?', help="Directory to copy (default: current directory)")
 
@@ -343,13 +358,13 @@ if __name__ == "__main__":
         else:
             output = args.get
         
-        get_file(client,args.get, directory, output)
+        get_file(client,args.iterations, args.get, directory, output)
         
     elif args.get_all:
-        get_all_files(client,directory)
+        get_all_files(client, args.iterations ,directory)
 
     elif args.save:
-        save_file(client,args.save)
+        save_file(client,args.iterations,args.save, args.client_encrypt)
     
     elif args.delete_all:
         delete_all_files(client)
